@@ -405,8 +405,8 @@
 
 #define TxRecords 7
 #define EndProcess 10
-#define N_SAMPLE				60
-#define N_RECORD				500
+#define N_SAMPLE				120
+#define N_RECORD				600
 #define N_CH						4
 
 #define LED2_ON() HAL_GPIO_WritePin(GPIOH, LED2_Pin, GPIO_PIN_SET)

@@ -136,19 +136,19 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 						//Address = Address + 4;
 					}	
 						LED1_ON();
-						LED2_ON();
-						LED3_ON();
-						LED4_ON();
-						TransmitData(DATA_CH1[j]);
-						TransmitData(DATA_CH2[j]);
-						TransmitData(DATA_CH3[j]);
+						//LED2_ON();
+						//LED3_ON();
+						//LED4_ON();
+						//TransmitData(DATA_CH1[j]);
+						//TransmitData(DATA_CH2[j]);
+						//TransmitData(DATA_CH3[j]);
 						TransmitData(DATA_CH4[j]);
 						LED1_OFF();
-						LED2_OFF();
-						LED3_OFF();
-						LED4_OFF();					
+						//LED2_OFF();
+						//LED3_OFF();
+						//LED4_OFF();					
 					//}
-					j++;
+					//j++;
 				}
 				else if((KEY1_Read() == 0) && (KEY2_Read() == 0))
 				{					
@@ -173,9 +173,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 						DATA_CH4[j][i] = ADC_BUF[4*i+3];	
 
 					}					
-					uint8_t index = 20;
+					uint8_t index = 30;
 					int CH1_Avg = 0, CH2_Avg = 0, CH3_Avg = 0, CH4_Avg = 0;
-					for (int z=0; z < 25; z++)
+					for (int z=0; z < 20; z++)
 					{
 						CH1_Avg += DATA_CH1[j][index+z];
 						CH2_Avg += DATA_CH2[j][index+z];
@@ -186,12 +186,19 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 					//CH2_Avg = (DATA_CH2[j][index] + DATA_CH2[j][index+1] + DATA_CH2[j][index+2] + DATA_CH2[j][index+3] + DATA_CH2[j][index+4] + DATA_CH2[j][index+5] + DATA_CH2[j][index+6] + DATA_CH2[j][index+7] + DATA_CH2[j][index+8] + DATA_CH2[j][index+9]+ DATA_CH2[j][index+10]+ DATA_CH2[j][index+11]+ DATA_CH2[j][index+12]+ DATA_CH2[j][index+13])/14;
 					//CH3_Avg = (DATA_CH3[j][index] + DATA_CH3[j][index+1] + DATA_CH3[j][index+2] + DATA_CH3[j][index+3] + DATA_CH3[j][index+4] + DATA_CH3[j][index+5] + DATA_CH3[j][index+6] + DATA_CH3[j][index+7] + DATA_CH3[j][index+8] + DATA_CH3[j][index+9]+ DATA_CH3[j][index+10]+ DATA_CH3[j][index+11]+ DATA_CH3[j][index+12]+ DATA_CH3[j][index+13])/14;
 					//CH4_Avg = (DATA_CH4[j][index] + DATA_CH4[j][index+1] + DATA_CH4[j][index+2] + DATA_CH4[j][index+3] + DATA_CH4[j][index+4] + DATA_CH4[j][index+5] + DATA_CH4[j][index+6] + DATA_CH4[j][index+7] + DATA_CH4[j][index+8] + DATA_CH4[j][index+9]+ DATA_CH4[j][index+10]+ DATA_CH4[j][index+11]+ DATA_CH4[j][index+12]+ DATA_CH4[j][index+13])/14;
-					int CH_Avg = (CH1_Avg/20 + CH2_Avg/20 + CH3_Avg/20 + CH4_Avg/20)/4;
+					//int CH_Avg = (CH1_Avg/20 + CH2_Avg/20 + CH3_Avg/20 + CH4_Avg/20)/4;
+					int CH_Avg = (CH3_Avg/20);
 					//HAL_UART_Transmit(&huart1, (uint8_t*)&CH1_Avg, 1,1000);
 					//HAL_UART_Transmit(&huart1, (uint8_t*)&CH2_Avg, 1,1000);
 					//HAL_UART_Transmit(&huart1, (uint8_t*)&CH3_Avg, 1,1000);
 					//HAL_UART_Transmit(&huart1, (uint8_t*)&CH4_Avg, 1,1000);
-					HAL_UART_Transmit(&huart1, (uint8_t*)&CH_Avg, 1,1000);
+					if (j == 0)
+					{
+						HAL_UART_Transmit(&huart1, (uint8_t*)&CH_Avg, 1,1000);
+						j = 0;
+					}
+					else
+						j++;
 						//TransmitData(DATA_CH1[j]);
 						//TransmitData(DATA_CH2[j]);
 						//TransmitData(DATA_CH3[j]);
