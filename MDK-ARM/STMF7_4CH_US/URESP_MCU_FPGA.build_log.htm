@@ -22,16 +22,29 @@ Dialog DLL:      TCM.DLL V1.32.0.0
  
 <h2>Project:</h2>
 C:\Users\ashahs\source\repos\URESP_MCU_FPGA\MDK-ARM\STMF7_4CH_US.uvprojx
-Project File Date:  09/12/2021
+Project File Date:  09/19/2021
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'URESP_MCU_FPGA'
 compiling main.c...
+../Src/main.c(145): warning:  #177-D: variable "CH1_Avg"  was declared but never referenced
+  				int CH1_Avg = 0, CH2_Avg = 0, CH3_Avg = 0, CH4_Avg = 0;
+../Src/main.c(145): warning:  #177-D: variable "CH2_Avg"  was declared but never referenced
+  				int CH1_Avg = 0, CH2_Avg = 0, CH3_Avg = 0, CH4_Avg = 0;
+../Src/main.c(145): warning:  #177-D: variable "CH3_Avg"  was declared but never referenced
+  				int CH1_Avg = 0, CH2_Avg = 0, CH3_Avg = 0, CH4_Avg = 0;
+../Src/main.c(145): warning:  #177-D: variable "CH4_Avg"  was declared but never referenced
+  				int CH1_Avg = 0, CH2_Avg = 0, CH3_Avg = 0, CH4_Avg = 0;
+../Src/main.c(1203): warning:  #177-D: function "GetSector"  was declared but never referenced
+  static uint32_t GetSector(uint32_t Address)
+../Src/main.c(52): warning:  #177-D: variable "EraseInitStruct"  was declared but never referenced
+  static FLASH_EraseInitTypeDef EraseInitStruct;
+../Src/main.c: 6 warnings, 0 errors
 linking...
-Program Size: Code=16616 RO-data=520 RW-data=48 ZI-data=290072  
+Program Size: Code=16928 RO-data=520 RW-data=48 ZI-data=290072  
 FromELF: creating hex file...
-"STMF7_4CH_US\URESP_MCU_FPGA.axf" - 0 Error(s), 0 Warning(s).
+"STMF7_4CH_US\URESP_MCU_FPGA.axf" - 0 Error(s), 6 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -54,7 +67,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.2
-Build Time Elapsed:  00:00:10
+Build Time Elapsed:  00:00:13
 </pre>
 </body>
 </html>

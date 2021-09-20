@@ -106,170 +106,185 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	int i = 0;
-	
+	int Averages[4] = { 0,0,0,0 };
+	uint8_t index = 25;
+	uint8_t range = 15;
+	uint8_t CH_Avg = 0;
 	//HAL_ADC_Stop_DMA(&hadc3);
 	if (hadc->Instance == ADC3)
 	{
 		//HAL_ADC_Stop_DMA(&hadc3);
-		if (j<N_RECORD)			
+		if (j < N_RECORD)
 		{
-			
+			/*
 				if ((KEY1_Read() == 1) && (KEY2_Read() == 1) && ( (N_REC)))
 				{
 					LED1_ON();
+					LED2_ON();
+					LED3_ON();
+					LED4_ON();
 					while(HAL_UART_Transmit(&huart1, ADC_BUF, 4*N_SAMPLE,1000)!= HAL_OK);
 					LED1_OFF();
+					LED2_OFF();
+					LED3_OFF();
+					LED4_OFF();
 					N_REC--;
 					//j++;
 				}
-				else if ((KEY1_Read() == 0) && (KEY2_Read() == 1))
+			*/
+			if ((KEY1_Read() == 1) && (KEY2_Read() == 1) && ((N_REC)))
+			{
+				for (i = 0; i < (index + range + 1); i = i + 1)
 				{
-					//if (j%2)
-					//{
-					for (i=0; i<N_SAMPLE;i=i+1)
-					{
-						DATA_CH1[j][i] = ADC_BUF[4*i];
-						DATA_CH2[j][i] = ADC_BUF[4*i+1];
-						DATA_CH3[j][i] = ADC_BUF[4*i+2];
-						DATA_CH4[j][i] = ADC_BUF[4*i+3];	
-						//while(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, Address, ADC_BUF[4*i]) != HAL_OK);						
-						//Address = Address + 4;
-					}	
-						LED1_ON();
-						//LED2_ON();
-						//LED3_ON();
-						//LED4_ON();
-						//TransmitData(DATA_CH1[j]);
-						//TransmitData(DATA_CH2[j]);
-						//TransmitData(DATA_CH3[j]);
-						TransmitData(DATA_CH4[j]);
-						LED1_OFF();
-						//LED2_OFF();
-						//LED3_OFF();
-						//LED4_OFF();					
-					//}
-					//j++;
-				}
-				else if((KEY1_Read() == 0) && (KEY2_Read() == 0))
-				{					
-					for (i=0; i<N_SAMPLE;i=i+1)
-					{
-						DATA_CH1[j][i] = ADC_BUF[4*i];
-						DATA_CH2[j][i] = ADC_BUF[4*i+1];
-						DATA_CH3[j][i] = ADC_BUF[4*i+2];
-						DATA_CH4[j][i] = ADC_BUF[4*i+3];	
-						//while(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, Address, ADC_BUF[4*i]) != HAL_OK);						
-						//Address = Address + 4;
-					}		
-					j++;
-				}
-				else	if ((KEY1_Read() == 1) && (KEY2_Read() == 0))
-				{					
-					for (i=0; i<N_SAMPLE;i=i+1)
-					{
-						DATA_CH1[j][i] = ADC_BUF[4*i];
-						DATA_CH2[j][i] = ADC_BUF[4*i+1];
-						DATA_CH3[j][i] = ADC_BUF[4*i+2];
-						DATA_CH4[j][i] = ADC_BUF[4*i+3];	
+					DATA_CH1[j][i] = ADC_BUF[4 * i];
+					DATA_CH2[j][i] = ADC_BUF[4 * i + 1];
+					DATA_CH3[j][i] = ADC_BUF[4 * i + 2];
+					DATA_CH4[j][i] = ADC_BUF[4 * i + 3];
 
-					}					
-					uint8_t index = 30;
-					int CH1_Avg = 0, CH2_Avg = 0, CH3_Avg = 0, CH4_Avg = 0;
-					for (int z=0; z < 20; z++)
-					{
-						CH1_Avg += DATA_CH1[j][index+z];
-						CH2_Avg += DATA_CH2[j][index+z];
-						CH3_Avg += DATA_CH3[j][index+z];
-						CH4_Avg += DATA_CH4[j][index+z];
-					}
-					//CH1_Avg = (DATA_CH1[j][index] + DATA_CH1[j][index+1] + DATA_CH1[j][index+2] + DATA_CH1[j][index+3] + DATA_CH1[j][index+4] + DATA_CH1[j][index+5] + DATA_CH1[j][index+6] + DATA_CH1[j][index+7] + DATA_CH1[j][index+8] + DATA_CH1[j][index+9]+ DATA_CH1[j][index+10]+ DATA_CH1[j][index+11]+ DATA_CH1[j][index+12]+ DATA_CH1[j][index+13])/14;
-					//CH2_Avg = (DATA_CH2[j][index] + DATA_CH2[j][index+1] + DATA_CH2[j][index+2] + DATA_CH2[j][index+3] + DATA_CH2[j][index+4] + DATA_CH2[j][index+5] + DATA_CH2[j][index+6] + DATA_CH2[j][index+7] + DATA_CH2[j][index+8] + DATA_CH2[j][index+9]+ DATA_CH2[j][index+10]+ DATA_CH2[j][index+11]+ DATA_CH2[j][index+12]+ DATA_CH2[j][index+13])/14;
-					//CH3_Avg = (DATA_CH3[j][index] + DATA_CH3[j][index+1] + DATA_CH3[j][index+2] + DATA_CH3[j][index+3] + DATA_CH3[j][index+4] + DATA_CH3[j][index+5] + DATA_CH3[j][index+6] + DATA_CH3[j][index+7] + DATA_CH3[j][index+8] + DATA_CH3[j][index+9]+ DATA_CH3[j][index+10]+ DATA_CH3[j][index+11]+ DATA_CH3[j][index+12]+ DATA_CH3[j][index+13])/14;
-					//CH4_Avg = (DATA_CH4[j][index] + DATA_CH4[j][index+1] + DATA_CH4[j][index+2] + DATA_CH4[j][index+3] + DATA_CH4[j][index+4] + DATA_CH4[j][index+5] + DATA_CH4[j][index+6] + DATA_CH4[j][index+7] + DATA_CH4[j][index+8] + DATA_CH4[j][index+9]+ DATA_CH4[j][index+10]+ DATA_CH4[j][index+11]+ DATA_CH4[j][index+12]+ DATA_CH4[j][index+13])/14;
-					//int CH_Avg = (CH1_Avg/20 + CH2_Avg/20 + CH3_Avg/20 + CH4_Avg/20)/4;
-					int CH_Avg = (CH3_Avg/20);
-					//HAL_UART_Transmit(&huart1, (uint8_t*)&CH1_Avg, 1,1000);
-					//HAL_UART_Transmit(&huart1, (uint8_t*)&CH2_Avg, 1,1000);
-					//HAL_UART_Transmit(&huart1, (uint8_t*)&CH3_Avg, 1,1000);
-					//HAL_UART_Transmit(&huart1, (uint8_t*)&CH4_Avg, 1,1000);
-					if (j == 0)
-					{
-						HAL_UART_Transmit(&huart1, (uint8_t*)&CH_Avg, 1,1000);
-						j = 0;
-					}
-					else
-						j++;
-						//TransmitData(DATA_CH1[j]);
-						//TransmitData(DATA_CH2[j]);
-						//TransmitData(DATA_CH3[j]);
-						//TransmitData(DATA_CH4[j]);					
-					//j++;
+				}
+				int CH1_Avg = 0, CH2_Avg = 0, CH3_Avg = 0, CH4_Avg = 0;
+				for (int z = 0; z < range; z++)
+				{
+					Averages[0] += DATA_CH1[j][index + z];
+					Averages[1] += DATA_CH2[j][index + z];
+					Averages[2] += DATA_CH3[j][index + z];
+					Averages[3] += DATA_CH4[j][index + z];
+				}
+				CH_Avg = 0;
+				Averages[0] = Averages[0] / range;
+				Averages[1] = Averages[1] / range;
+				Averages[2] = Averages[2] / range;
+				Averages[3] = Averages[3] / range;
+				for (int i = 0; i < 4; i++)
+				{
+					if (CH_Avg < (Averages[i]))
+						CH_Avg = (Averages[i]);
+				}
+				HAL_UART_Transmit(&huart1, (uint8_t*)&CH_Avg, 1, 1000);
+				j = 0;
+			}
+			else if ((KEY1_Read() == 0) && (KEY2_Read() == 1))
+			{
+				for (i = 0; i < N_SAMPLE; i = i + 1)
+				{
+					DATA_CH1[j][i] = ADC_BUF[4 * i];
+					DATA_CH2[j][i] = ADC_BUF[4 * i + 1];
+					DATA_CH3[j][i] = ADC_BUF[4 * i + 2];
+					DATA_CH4[j][i] = ADC_BUF[4 * i + 3];
+					//while(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, Address, ADC_BUF[4*i]) != HAL_OK);						
+					//Address = Address + 4;
+				}
+				//LED1_ON();
+				//LED2_ON();
+				//LED3_ON();
+				LED4_ON();
+				//TransmitData(DATA_CH1[j]);
+				//TransmitData(DATA_CH2[j]);
+				//TransmitData(DATA_CH3[j]);
+				TransmitData(DATA_CH4[j]);
+				//LED1_OFF();
+				//LED2_OFF();
+				//LED3_OFF();
+				LED4_OFF();
+			}
+			else if ((KEY1_Read() == 0) && (KEY2_Read() == 0))
+			{
+				for (i = 0; i < N_SAMPLE; i = i + 1)
+				{
+					DATA_CH1[j][i] = ADC_BUF[4 * i];
+					DATA_CH2[j][i] = ADC_BUF[4 * i + 1];
+					DATA_CH3[j][i] = ADC_BUF[4 * i + 2];
+					DATA_CH4[j][i] = ADC_BUF[4 * i + 3];
+					//while(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, Address, ADC_BUF[4*i]) != HAL_OK);						
+					//Address = Address + 4;
+				}
+				j++;
+			}
+			else	if ((KEY1_Read() == 1) && (KEY2_Read() == 0))
+			{
+				for (i = 0; i < N_SAMPLE; i = i + 1)
+				{
+					DATA_CH1[j][i] = ADC_BUF[4 * i];
+					DATA_CH2[j][i] = ADC_BUF[4 * i + 1];
+					DATA_CH3[j][i] = ADC_BUF[4 * i + 2];
+					DATA_CH4[j][i] = ADC_BUF[4 * i + 3];
+				}
+				for (int z = 0; z < range; z++)
+				{
+					Averages[0] += DATA_CH1[j][index + z];
+					Averages[1] += DATA_CH2[j][index + z];
+					Averages[2] += DATA_CH3[j][index + z];
+					Averages[3] += DATA_CH4[j][index + z];
 				}
 
-			
-		}		
-		else{			
+				Averages[0] = Averages[0] / range;
+				Averages[1] = Averages[1] / range;
+				Averages[2] = Averages[2] / range;
+				Averages[3] = Averages[3] / range;
+				//HAL_UART_Transmit(&huart1, (uint8_t*)&Averages[0], 1,1000);
+				//HAL_UART_Transmit(&huart1, (uint8_t*)&Averages[1], 1,1000);
+				//HAL_UART_Transmit(&huart1, (uint8_t*)&Averages[2], 1,1000);
+				HAL_UART_Transmit(&huart1, (uint8_t*)&Averages[3], 1, 1000);
+
+				j = 0;
+			}
+
+
+		}
+		else {
 			j = 0;
 			EndRecordAddress = Address;
 			Address = FLASH_USER_START_ADDR;
 			HAL_NVIC_DisableIRQ(EXTI15_10_IRQn);
-			LED0_OFF();	
-			while(BTN2_Read())
+			LED0_OFF();
+			while (BTN2_Read())
 			{
 				LED1_ON();
 				delay(0xffff);
 				LED1_OFF();
 				delay(0xffff);
-			}			
+			}
 			//HAL_ADC_Stop_DMA(&hadc3);
-				if ((KEY1_Read() == 0) && (KEY2_Read() == 0))
-				{									
-						//while (Address <= EndRecordAddress)
-						while (j <= N_RECORD)
-						{	
-						LED1_ON();
-						while(HAL_UART_Transmit(&huart1, (uint8_t*)&DATA_CH1[j], N_SAMPLE,1000)!= HAL_OK);
-						//while(HAL_UART_Transmit(&huart1, (uint8_t*)((__IO uint8_t *)(Address)), 1,1000)!= HAL_OK);
-						LED1_OFF();
-						delay(100);
-							
-						LED2_ON();
-						while(HAL_UART_Transmit(&huart1, (uint8_t*)&DATA_CH2[j], N_SAMPLE,1000)!= HAL_OK);
-						//while(HAL_UART_Transmit(&huart1, (uint8_t*)((__IO uint8_t *)(Address+1)), 1,1000)!= HAL_OK);
-						LED2_OFF();
-							
-						delay(100);
-						LED3_ON();
-						while(HAL_UART_Transmit(&huart1, (uint8_t*)&DATA_CH3[j], N_SAMPLE,1000)!= HAL_OK);
-						//while(HAL_UART_Transmit(&huart1, (uint8_t*)((__IO uint8_t *)(Address+2)), 1,1000)!= HAL_OK);	
-						LED3_OFF();
-							
-						delay(100);
-						LED4_ON();
-						while(HAL_UART_Transmit(&huart1, (uint8_t*)&DATA_CH4[j], N_SAMPLE,1000)!= HAL_OK);
-						//while(HAL_UART_Transmit(&huart1, (uint8_t*)((__IO uint8_t *)(Address+3)), 1,1000)!= HAL_OK);	
-						LED4_OFF();	
-						j++;	
-						
-						Address = Address +4;
-						}
-						j = 0;
-						
-					}
-					//delay(5000);
-					
-					
-					
-				j = 0;
-				HAL_UART_Receive_IT(&huart1, RxCode, 2);						
-					
+			if ((KEY1_Read() == 0) && (KEY2_Read() == 0))
+			{
+				//while (Address <= EndRecordAddress)
+				while (j <= N_RECORD)
+				{
+					LED1_ON();
+					while (HAL_UART_Transmit(&huart1, (uint8_t*)&DATA_CH1[j], N_SAMPLE, 1000) != HAL_OK);
+					//while(HAL_UART_Transmit(&huart1, (uint8_t*)((__IO uint8_t *)(Address)), 1,1000)!= HAL_OK);
+					LED1_OFF();
+					delay(100);
+
+					LED2_ON();
+					while (HAL_UART_Transmit(&huart1, (uint8_t*)&DATA_CH2[j], N_SAMPLE, 1000) != HAL_OK);
+					//while(HAL_UART_Transmit(&huart1, (uint8_t*)((__IO uint8_t *)(Address+1)), 1,1000)!= HAL_OK);
+					LED2_OFF();
+
+					delay(100);
+					LED3_ON();
+					while (HAL_UART_Transmit(&huart1, (uint8_t*)&DATA_CH3[j], N_SAMPLE, 1000) != HAL_OK);
+					//while(HAL_UART_Transmit(&huart1, (uint8_t*)((__IO uint8_t *)(Address+2)), 1,1000)!= HAL_OK);	
+					LED3_OFF();
+
+					delay(100);
+					LED4_ON();
+					while (HAL_UART_Transmit(&huart1, (uint8_t*)&DATA_CH4[j], N_SAMPLE, 1000) != HAL_OK);
+					//while(HAL_UART_Transmit(&huart1, (uint8_t*)((__IO uint8_t *)(Address+3)), 1,1000)!= HAL_OK);	
+					LED4_OFF();
+					j++;
+
+					Address = Address + 4;
 				}
-		
-		
-		
+				j = 0;
+			}
+
+			j = 0;
+			HAL_UART_Receive_IT(&huart1, RxCode, 2);
+		}
 	}
-		
-}	
+
+}
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -401,15 +416,6 @@ int main(void)
 		RxCode[0] =0;
 		RxCode[1] =0;
 		HAL_Delay(5);
-		/*
-		while (!(RxCode[0] || RxCode[1]))
-		{
-		RxCode[0] =0;
-		RxCode[1] =0;
-		HAL_Delay(50);			
-		HAL_UART_Receive_IT(&huart1, RxCode, 2);					
-		}
-		*/
 		N_REC = RxCode[0] + RxCode[1]*256+10;
 		N_REC = 500;
 		RxCode[0] =0;
@@ -420,7 +426,6 @@ int main(void)
 		Address = FLASH_USER_START_ADDR;
 	}
 	HAL_UART_Receive_IT(&huart1, RxCode, 2);		
-	//HAL_Delay(50);
   }
   /* USER CODE END 3 */
 
