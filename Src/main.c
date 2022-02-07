@@ -53,8 +53,8 @@ static FLASH_EraseInitTypeDef EraseInitStruct;
 ADC_HandleTypeDef hadc3;
 DMA_HandleTypeDef hdma_adc3;
 
-QSPI_HandleTypeDef hqspi;
-
+//QSPI_HandleTypeDef hqspi;
+I2C_HandleTypeDef hi2c1;
 UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_usart1_rx;
 DMA_HandleTypeDef hdma_usart1_tx;
@@ -80,7 +80,14 @@ uint8_t DATA_CH1[N_RECORD][N_SAMPLE];
 uint8_t DATA_CH2[N_RECORD][N_SAMPLE];
 uint8_t DATA_CH3[N_RECORD][N_SAMPLE];
 uint8_t DATA_CH4[N_RECORD][N_SAMPLE];
+uint8_t cmd[3] = {0xAA, 0x00, 0x00}; // command to be sent
 uint8_t RxCode[2] = {0,0};
+uint8_t rxSensor[7] = {0,0,0,0,0,0,0};
+uint32_t APB2_Pressure = 0;
+uint8_t US_Data = 0;
+uint8_t NewLine[2] = {0x0a,0x0d};
+int APB2_Temp = 0;
+static void MX_I2C1_Init(void);
 void delay(int time)
 {	while(time--);
 }
@@ -160,7 +167,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 					if (CH_Avg < (Averages[i]))
 						CH_Avg = (Averages[i]);
 				}
-				HAL_UART_Transmit(&huart1, (uint8_t*)&CH_Avg, 1, 1000);
+				US_Data = CH_Avg;
+				//HAL_UART_Transmit(&huart1, (uint8_t*)&CH_Avg, 1, 1000);
+				//HAL_UART_Transmit(&huart1, NewLine, 2, 1000);
 				j = 0;
 			}
 			else if ((KEY1_Read() == 0) && (KEY2_Read() == 1))
@@ -285,6 +294,23 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 	}
 
 }
+
+void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c)
+{	
+	APB2_Pressure = rxSensor[3] + rxSensor[2]*256 + rxSensor[1]*65535;
+	APB2_Pressure = APB2_Pressure - 0x007D0000;
+	//HAL_UART_Transmit(&huart1, (uint8_t*)&APB2_Pressure, 4,1000);
+	NewLine[0] = US_Data-50;
+	NewLine[1] = (APB2_Pressure / 0x0800-20)/2;
+	HAL_UART_Transmit(&huart1, (uint8_t*)&NewLine, 2, 1000);
+}
+
+void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c)
+{	
+	
+	HAL_I2C_Master_Receive_IT(&hi2c1,0x50,rxSensor,7);
+	
+}
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -293,7 +319,7 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_ADC3_Init(void);
-static void MX_QUADSPI_Init(void);
+//static void MX_QUADSPI_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -321,8 +347,8 @@ int main(void)
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
-  /* USER CODE BEGIN Init */
-
+  /* USER CODE BEGIN Init */	
+	
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -363,10 +389,10 @@ int main(void)
   MX_DMA_Init();
   MX_USART1_UART_Init();
   MX_ADC3_Init();
-  MX_QUADSPI_Init();
+  //MX_QUADSPI_Init();
   /* USER CODE BEGIN 2 */
 
-	
+	MX_I2C1_Init();
 	LED0_ON();
 	HAL_Delay(50);
 	LED1_ON();
@@ -397,8 +423,7 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */		
-		//RxCode[0] = (uint16_t)ReceiveData();
-		//RxCode[0] =0;
+
 	if(!(BTN2_Read()) || (( RxCode[0] == 'S')&&( RxCode[1] == 's')) || (N_REC == 0))
 	{
 		RxCode[0] =0;
@@ -484,8 +509,15 @@ void SystemClock_Config(void)
     _Error_Handler(__FILE__, __LINE__);
   }
 
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART1;
-  PeriphClkInitStruct.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_I2C1;
+  PeriphClkInitStruct.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;	
+  PeriphClkInitStruct.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
+	
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+	
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -501,6 +533,41 @@ void SystemClock_Config(void)
 
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+}
+
+
+/* I2C1 init function */
+static void MX_I2C1_Init(void)
+{
+
+  hi2c1.Instance = I2C1;
+  hi2c1.Init.Timing = 0x20404768;
+  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c1.Init.OwnAddress2 = 0;
+  hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**Configure Analogue filter 
+    */
+  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**Configure Digital filter 
+    */
+  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
 }
 
 /* ADC3 init function */
@@ -567,26 +634,26 @@ static void MX_ADC3_Init(void)
 
 }
 
-/* QUADSPI init function */
-static void MX_QUADSPI_Init(void)
-{
+///* QUADSPI init function */
+//static void MX_QUADSPI_Init(void)
+//{
 
-  /* QUADSPI parameter configuration*/
-  hqspi.Instance = QUADSPI;
-  hqspi.Init.ClockPrescaler = 255;
-  hqspi.Init.FifoThreshold = 1;
-  hqspi.Init.SampleShifting = QSPI_SAMPLE_SHIFTING_NONE;
-  hqspi.Init.FlashSize = 1;
-  hqspi.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_1_CYCLE;
-  hqspi.Init.ClockMode = QSPI_CLOCK_MODE_0;
-  hqspi.Init.FlashID = QSPI_FLASH_ID_1;
-  hqspi.Init.DualFlash = QSPI_DUALFLASH_DISABLE;
-  if (HAL_QSPI_Init(&hqspi) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+//  /* QUADSPI parameter configuration*/
+//  hqspi.Instance = QUADSPI;
+//  hqspi.Init.ClockPrescaler = 255;
+//  hqspi.Init.FifoThreshold = 1;
+//  hqspi.Init.SampleShifting = QSPI_SAMPLE_SHIFTING_NONE;
+//  hqspi.Init.FlashSize = 1;
+//  hqspi.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_1_CYCLE;
+//  hqspi.Init.ClockMode = QSPI_CLOCK_MODE_0;
+//  hqspi.Init.FlashID = QSPI_FLASH_ID_1;
+//  hqspi.Init.DualFlash = QSPI_DUALFLASH_DISABLE;
+//  if (HAL_QSPI_Init(&hqspi) != HAL_OK)
+//  {
+//    _Error_Handler(__FILE__, __LINE__);
+//  }
 
-}
+//}
 
 /* USART1 init function */
 static void MX_USART1_UART_Init(void)
@@ -822,7 +889,8 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pins : KEY1_Pin BTN3_Pin KEY2_Pin */
-  GPIO_InitStruct.Pin = KEY1_Pin|BTN3_Pin|KEY2_Pin;
+  //GPIO_InitStruct.Pin = KEY1_Pin|BTN3_Pin|KEY2_Pin;
+	GPIO_InitStruct.Pin = BTN3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -1178,13 +1246,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF10_OTG_HS;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : ARDUINO_MISO_D12_Pin ARDUINO_MOSI_PWM_D11_Pin */
-  GPIO_InitStruct.Pin = ARDUINO_MISO_D12_Pin|ARDUINO_MOSI_PWM_D11_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+//  /*Configure GPIO pins : ARDUINO_MISO_D12_Pin ARDUINO_MOSI_PWM_D11_Pin */
+//  GPIO_InitStruct.Pin = ARDUINO_MISO_D12_Pin|ARDUINO_MOSI_PWM_D11_Pin;
+//  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+//  GPIO_InitStruct.Pull = GPIO_NOPULL;
+//  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+//  GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
+//  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);

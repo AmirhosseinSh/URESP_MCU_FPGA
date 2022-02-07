@@ -430,8 +430,11 @@
 #define BTN2_Read() HAL_GPIO_ReadPin(GPIOG, BTN2_Pin)
 #define BTN3_Read() HAL_GPIO_ReadPin(GPIOB, BTN3_Pin)
 
-#define KEY1_Read() HAL_GPIO_ReadPin(GPIOB, KEY1_Pin)
-#define KEY2_Read() HAL_GPIO_ReadPin(GPIOB, KEY2_Pin)
+//#define KEY1_Read() HAL_GPIO_ReadPin(GPIOB, KEY1_Pin)
+//#define KEY2_Read() HAL_GPIO_ReadPin(GPIOB, KEY2_Pin)
+
+#define KEY1_Read() 1
+#define KEY2_Read() 1
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

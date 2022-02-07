@@ -37,6 +37,7 @@
 
 /* USER CODE BEGIN 0 */
 extern uint8_t ADC_BUF[N_SAMPLE*N_CH*2];
+extern uint8_t cmd[3];
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -45,6 +46,7 @@ extern ADC_HandleTypeDef hadc3;
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern UART_HandleTypeDef huart1;
+extern I2C_HandleTypeDef hi2c1;
 
 /******************************************************************************/
 /*            Cortex-M7 Processor Interruption and Exception Handlers         */ 
@@ -185,7 +187,7 @@ void SysTick_Handler(void)
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-
+	
   /* USER CODE END SysTick_IRQn 1 */
 }
 
@@ -225,6 +227,20 @@ void USART1_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles I2C1 event interrupt.
+  */
+void I2C1_EV_IRQHandler(void)
+{
+  /* USER CODE BEGIN I2C1_EV_IRQn 0 */
+
+  /* USER CODE END I2C1_EV_IRQn 0 */
+  HAL_I2C_EV_IRQHandler(&hi2c1);
+  /* USER CODE BEGIN I2C1_EV_IRQn 1 */
+
+  /* USER CODE END I2C1_EV_IRQn 1 */
+}
+
+/**
 * @brief This function handles EXTI line[15:10] interrupts.
 */
 void EXTI15_10_IRQHandler(void)
@@ -234,7 +250,8 @@ void EXTI15_10_IRQHandler(void)
   /* USER CODE END EXTI15_10_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_15);
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
-HAL_ADC_Start_DMA(&hadc3, (uint32_t*)ADC_BUF,4*N_SAMPLE-1);
+	HAL_I2C_Master_Transmit_IT(&hi2c1,0x50,cmd,3);
+	HAL_ADC_Start_DMA(&hadc3, (uint32_t*)ADC_BUF,4*N_SAMPLE-1);
 	//LED0_ON();
 	LED0_Toggle();
   /* USER CODE END EXTI15_10_IRQn 1 */
